@@ -4,7 +4,12 @@ const letterBody = document.getElementById('letterBody');
 const seeMore = document.getElementById('seeMore');
 const messages = document.getElementById('messages');
 const closeLetter = document.getElementById('closeLetter');
-const hint = document.querySelector('.hint');
+const hint = document.getElementById('hint');
+
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+const MAX_PARTICLES = prefersReducedMotion ? 0 : (isCoarsePointer ? 15 : 30);
+const focusableSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 let phase = 0; // 0: cerrado, 1: sobre abierto, 2: carta en modo lectura, 3: celebración
 let msgIndex = 0;
@@ -29,15 +34,37 @@ const compliments = [
 const petals = ['🌸','💐','🌹','🌷','🌺','💮'];
 const hearts = ['💖','💗','💓','💞','💕','❤️'];
 
+function trapFocus(e){
+  if (!letter.classList.contains('fullscreen')) return;
+  if (e.key !== 'Tab') return;
+  const focusable = Array.from(letter.querySelectorAll(focusableSelector));
+  if (focusable.length === 0) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (e.shiftKey && document.activeElement === first){
+    e.preventDefault();
+    last.focus();
+  } else if (!e.shiftKey && document.activeElement === last){
+    e.preventDefault();
+    first.focus();
+  }
+}
+
 function openEnvelope(){
   if (phase > 0 || isOpening) return;
   isOpening = true;
 
-  // Oculta la pista visual
-  if (hint) hint.style.opacity = '0';
+  // Oculta y elimina la pista visual
+  if (hint){
+    hint.style.opacity = '0';
+    setTimeout(() => hint.remove(), 400);
+  }
 
   // 1) gira la solapa
   envelope.classList.add('open');
+  envelope.setAttribute('aria-expanded', 'true');
+  letter.removeAttribute('aria-hidden');
+  letter.tabIndex = 0;
 
   // 2) tras un pequeño delay, levanta la carta
   setTimeout(() => {
@@ -53,13 +80,19 @@ function openEnvelope(){
 function enterFullscreen(){
   letter.classList.add('fullscreen');
   document.body.classList.add('reading');
-  const head = letter.querySelector('.letter-head');
-  if (head) { head.setAttribute('tabindex', '-1'); head.focus(); }
+  letter.setAttribute('role', 'dialog');
+  letter.setAttribute('aria-modal', 'true');
+  document.addEventListener('keydown', trapFocus);
+  if (closeLetter) { closeLetter.focus(); }
   phase = 2;
 }
 function exitFullscreen(){
   letter.classList.remove('fullscreen');
   document.body.classList.remove('reading');
+  letter.removeAttribute('role');
+  letter.removeAttribute('aria-modal');
+  document.removeEventListener('keydown', trapFocus);
+  letter.focus();
   phase = 1;
 }
 
@@ -88,13 +121,20 @@ function spawnParticle(icon){
 }
 
 function confettiBurst(){
+  if (MAX_PARTICLES === 0) return;
   const icons = [...hearts, ...petals];
-  for (let i = 0; i < 30; i++){
-    setTimeout(() => {
+  let count = 0;
+  let last = 0;
+  function frame(ts){
+    if (ts - last > 60){
       const icon = icons[Math.floor(Math.random() * icons.length)];
       spawnParticle(icon);
-    }, i * 60);
+      last = ts;
+      count++;
+    }
+    if (count < MAX_PARTICLES) requestAnimationFrame(frame);
   }
+  requestAnimationFrame(frame);
 }
 
 function toast(text){
@@ -161,9 +201,9 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Accesibilidad con teclado
-envelope.tabIndex = 0;
-letter.tabIndex = 0;
-envelope.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') openEnvelope(); });
+envelope.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') openEnvelope();
+});
 letter.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' || e.key === ' '){
     if (letter.classList.contains('fullscreen')) exitFullscreen();
