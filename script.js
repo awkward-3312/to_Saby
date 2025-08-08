@@ -4,7 +4,7 @@ const letterBody = document.getElementById('letterBody');
 const seeMore = document.getElementById('seeMore');
 const messages = document.getElementById('messages');
 
-let phase = 0; // 0: cerrado, 1: sobre abierto, 2: carta expandida, 3: celebración
+let phase = 0; // 0: cerrado, 1: sobre abierto, 2: carta en modo lectura, 3: celebración
 let msgIndex = 0;
 let isOpening = false; // evita doble clic durante la animación
 
@@ -28,7 +28,7 @@ const petals = ['🌸','💐','🌹','🌷','🌺','💮'];
 const hearts = ['💖','💗','💓','💞','💕','❤️'];
 
 function openEnvelope(){
-  if(phase > 0 || isOpening) return;
+  if (phase > 0 || isOpening) return;
   isOpening = true;
 
   // 1) gira la solapa
@@ -41,14 +41,33 @@ function openEnvelope(){
     setTimeout(() => {
       isOpening = false;
       phase = 1;
-    }, FLAP_TIME); // margen para la transición de la carta
+    }, FLAP_TIME);
   }, LIFT_DELAY);
 }
 
-function expandLetter(){
-  if(phase !== 1) return;
-  letter.classList.add('expanded');
+// Modo lectura (pantalla casi completa)
+function enterFullscreen(){
+  letter.classList.add('fullscreen');
+  document.body.classList.add('reading'); // bloquea scroll del fondo
   phase = 2;
+}
+function exitFullscreen(){
+  letter.classList.remove('fullscreen');
+  document.body.classList.remove('reading');
+  // vuelve al estado de carta levantada
+  phase = 1;
+}
+
+// Click en la carta: abre modo lectura o lo cierra si ya está abierto
+function onLetterClick(e){
+  // Si el clic fue en el botón "Ver más…", no cerrar/abrir fullscreen
+  if (e.target && e.target.id === 'seeMore') return;
+
+  if (phase === 1 && !letter.classList.contains('fullscreen')){
+    enterFullscreen();
+  } else if (letter.classList.contains('fullscreen')){
+    exitFullscreen();
+  }
 }
 
 function spawnParticle(icon){
@@ -112,11 +131,11 @@ function showFinalPrompt(){
 
 // Eventos
 envelope.addEventListener('click', openEnvelope);
-letter.addEventListener('click', expandLetter);
+letter.addEventListener('click', onLetterClick);
 
 seeMore.addEventListener('click', (e) => {
   e.stopPropagation();
-  if (phase < 2) return;   // aún no está expandida
+  if (phase < 2) return;   // requiere modo lectura (pantalla completa)
   if (phase === 2){ phase = 3; }
   nextCompliment();
 });
@@ -125,4 +144,9 @@ seeMore.addEventListener('click', (e) => {
 envelope.tabIndex = 0;
 letter.tabIndex = 0;
 envelope.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') openEnvelope(); });
-letter.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') expandLetter(); });
+letter.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' '){
+    if (letter.classList.contains('fullscreen')) exitFullscreen();
+    else if (phase === 1) enterFullscreen();
+  }
+});

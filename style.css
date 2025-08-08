@@ -23,7 +23,13 @@ body{
 .stage{min-height:100%; display:grid; place-items:center; padding:clamp(20px,6vw,40px)}
 
 /* Tarjeta / Sobre */
-.envelope-wrap{position:relative; width:min(420px, 86vw); aspect-ratio:3/2; perspective:1200px;}
+.envelope-wrap{
+  position:relative;
+  width:min(420px, 86vw);
+  aspect-ratio:3/2;
+  perspective:1200px;
+  overflow:visible; /* permite que la carta sobresalga */
+}
 .hint{position:absolute; width:100%; text-align:center; top:-36px; font-size:clamp(12px,3vw,14px); opacity:.8}
 
 .envelope{
@@ -46,6 +52,7 @@ body{
   clip-path: polygon(0 0,100% 0,100% 100%,0 100%, 50% 58%);
   border:2px solid #ffd1db;
   z-index:2;
+  pointer-events:none; /* evita tapar la carta */
 }
 .flap{
   position:absolute; inset:0;
@@ -113,9 +120,34 @@ body{
   pointer-events:auto;
 }
 
-/* Carta expandida */
-.letter.expanded{ height:90% }
-.letter.expanded .letter-body{ max-height:1000px }
+/* Modo lectura fullscreen */
+body.reading{overflow:hidden;}
+.letter.fullscreen{
+  position:fixed;
+  top:4vh;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(680px, 92vw);
+  height:92vh;
+  opacity:1;
+  pointer-events:auto;
+  z-index:999;
+  border-radius:14px;
+  box-shadow:0 20px 60px rgba(0,0,0,.25);
+  transition:
+    transform 500ms cubic-bezier(.2,.8,.2,1),
+    opacity 300ms ease;
+}
+.letter.fullscreen .letter-body{
+  max-height:none;
+  height:calc(92vh - 72px);
+  overflow:auto;
+}
+.letter.fullscreen .letter-head{
+  position:sticky;
+  top:0;
+  z-index:1;
+}
 
 /* Mensajes dinámicos */
 .messages{
@@ -156,5 +188,5 @@ body{
 /* Responsivo */
 @media (max-width:480px){
   .envelope-wrap{width:90vw}
-  .letter.expanded{height:96%}
+  .letter.fullscreen{width:94vw; height:94vh;}
 }
