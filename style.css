@@ -161,7 +161,9 @@ body.reading{overflow:hidden;}
 .letter.fullscreen .letter-body{
   max-height:none;
   height:calc(92vh - 72px); /* 72px aprox. header */
-  overflow:auto;
+  overflow-y:auto;
+  padding-bottom: max(60px, env(safe-area-inset-bottom));
+  -webkit-overflow-scrolling: touch;
 }
 .letter.fullscreen .letter-head{
   position:sticky;
