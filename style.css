@@ -30,12 +30,19 @@ body{
   perspective:1200px;
   overflow:visible; /* permite que la carta sobresalga */
 }
-.hint{position:absolute; width:100%; text-align:center; top:-36px; font-size:clamp(12px,3vw,14px); opacity:.8}
+.hint{
+  position:absolute; width:100%; text-align:center; top:-36px;
+  font-size:clamp(12px,3vw,14px); opacity:.8; transition:opacity .3s ease;
+}
 
 .envelope{
   position:relative; width:100%; height:100%;
   border-radius:16px; box-shadow:var(--shadow);
   transform-style:preserve-3d; cursor:pointer
+}
+/* Suaviza rendering 3D en Safari/iOS */
+.envelope, .flap, .pocket, .letter{
+  -webkit-backface-visibility:hidden; backface-visibility:hidden; transform:translateZ(0);
 }
 
 /* Capas (z-index) */
@@ -86,7 +93,8 @@ body{
   padding:18px 20px; border-bottom:1px dashed #f0d5d5;
   background:linear-gradient(180deg,#fff,#fff7f2);
   font-weight:600; color:#c24a64;
-  display:flex; align-items:center; gap:8px
+  display:flex; align-items:center; gap:8px;
+  font-size:clamp(16px, 2vw, 18px);
 }
 .stamp{
   margin-left:auto; width:38px; height:30px; border-radius:6px;
@@ -94,11 +102,22 @@ body{
   opacity:.8
 }
 
+/* Botón de cierre (UX) */
+.close-btn{
+  margin-left:8px;
+  border:none; background:transparent; cursor:pointer;
+  font-size:18px; line-height:1; padding:6px 10px;
+  border-radius:10px;
+}
+.close-btn:hover{ background:#ffe8ee; }
+.close-btn:focus-visible{ outline:2px solid var(--rose); outline-offset:2px; }
+
 .letter-body{
   padding:18px 20px 60px 20px; line-height:1.6;
   max-height:0; overflow:hidden;
   transition:max-height 900ms cubic-bezier(.2,.8,.2,1);
   font-size:clamp(14px,3.5vw,16px);
+  letter-spacing:.2px;
 }
 .letter-body p{margin:.25rem 0}
 
@@ -108,6 +127,7 @@ body{
   box-shadow:0 6px 14px rgba(255,107,136,.3); touch-action:manipulation
 }
 .cta:active{transform:translateY(1px)}
+.cta:focus-visible{ outline:2px solid var(--rose); outline-offset:2px; }
 
 /* Estado abierto */
 .envelope.open .flap{
@@ -124,7 +144,7 @@ body{
 body.reading{overflow:hidden;}
 .letter.fullscreen{
   position:fixed;
-  top:4vh;
+  top:max(4vh, env(safe-area-inset-top));
   left:50%;
   transform:translateX(-50%);
   width:min(680px, 92vw);
@@ -140,13 +160,19 @@ body.reading{overflow:hidden;}
 }
 .letter.fullscreen .letter-body{
   max-height:none;
-  height:calc(92vh - 72px);
+  height:calc(92vh - 72px); /* 72px aprox. header */
   overflow:auto;
 }
 .letter.fullscreen .letter-head{
   position:sticky;
   top:0;
   z-index:1;
+  background:linear-gradient(180deg,#fff,#fff7f2);
+}
+/* CTA siempre accesible en lectura */
+.letter.fullscreen .cta{
+  position: sticky;
+  bottom: 8px;
 }
 
 /* Mensajes dinámicos */
@@ -181,9 +207,20 @@ body.reading{overflow:hidden;}
   touch-action:manipulation
 }
 .btn.alt{background:#ffd1db; color:#c24a64}
+.btn:focus-visible{ outline:2px solid var(--rose); outline-offset:2px; }
 
 /* Footer sutil */
 .footer{position:fixed; bottom:10px; left:0; right:0; text-align:center; font-size:12px; opacity:.6}
+
+/* Reduced motion (accesibilidad) */
+@media (prefers-reduced-motion: reduce){
+  *{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+  }
+  .particle{ display:none !important; }
+}
 
 /* Responsivo */
 @media (max-width:480px){

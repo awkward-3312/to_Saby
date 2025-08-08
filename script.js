@@ -3,6 +3,8 @@ const letter = document.getElementById('letter');
 const letterBody = document.getElementById('letterBody');
 const seeMore = document.getElementById('seeMore');
 const messages = document.getElementById('messages');
+const closeLetter = document.getElementById('closeLetter');
+const hint = document.querySelector('.hint');
 
 let phase = 0; // 0: cerrado, 1: sobre abierto, 2: carta en modo lectura, 3: celebración
 let msgIndex = 0;
@@ -31,13 +33,15 @@ function openEnvelope(){
   if (phase > 0 || isOpening) return;
   isOpening = true;
 
+  // Oculta la pista visual
+  if (hint) hint.style.opacity = '0';
+
   // 1) gira la solapa
   envelope.classList.add('open');
 
   // 2) tras un pequeño delay, levanta la carta
   setTimeout(() => {
     envelope.classList.add('lift');
-    // al terminar la animación consideramos el sobre "abierto"
     setTimeout(() => {
       isOpening = false;
       phase = 1;
@@ -48,21 +52,20 @@ function openEnvelope(){
 // Modo lectura (pantalla casi completa)
 function enterFullscreen(){
   letter.classList.add('fullscreen');
-  document.body.classList.add('reading'); // bloquea scroll del fondo
+  document.body.classList.add('reading');
+  const head = letter.querySelector('.letter-head');
+  if (head) { head.setAttribute('tabindex', '-1'); head.focus(); }
   phase = 2;
 }
 function exitFullscreen(){
   letter.classList.remove('fullscreen');
   document.body.classList.remove('reading');
-  // vuelve al estado de carta levantada
   phase = 1;
 }
 
 // Click en la carta: abre modo lectura o lo cierra si ya está abierto
 function onLetterClick(e){
-  // Si el clic fue en el botón "Ver más…", no cerrar/abrir fullscreen
   if (e.target && e.target.id === 'seeMore') return;
-
   if (phase === 1 && !letter.classList.contains('fullscreen')){
     enterFullscreen();
   } else if (letter.classList.contains('fullscreen')){
@@ -138,6 +141,23 @@ seeMore.addEventListener('click', (e) => {
   if (phase < 2) return;   // requiere modo lectura (pantalla completa)
   if (phase === 2){ phase = 3; }
   nextCompliment();
+});
+
+// Cerrar con el botón
+if (closeLetter) {
+  closeLetter.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (letter.classList.contains('fullscreen')) {
+      exitFullscreen();
+    }
+  });
+}
+
+// Cerrar con Esc
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && letter.classList.contains('fullscreen')) {
+    exitFullscreen();
+  }
 });
 
 // Accesibilidad con teclado
