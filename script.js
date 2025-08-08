@@ -24,9 +24,6 @@ const hearts = ['💖','💗','💓','💞','💕','❤️'];
 function openEnvelope(){
   if(phase>0) return;
   envelope.classList.add('open');
-  setTimeout(()=>{
-    letter.style.transform = 'translateX(-50%) translateY(-60%)';
-  }, 500);
   phase = 1;
 }
 
@@ -101,15 +98,13 @@ letter.addEventListener('click', expandLetter);
 
 seeMore.addEventListener('click', (e)=>{
   e.stopPropagation();
-  if(phase<2) return;
-  if(phase===2){
-    phase = 3;
-  }
+  if(phase<2) return;   // aún no está expandida
+  if(phase===2){ phase = 3; }
   nextCompliment();
 });
 
 // Accesibilidad con teclado
-envelope.tabIndex = 0; 
+envelope.tabIndex = 0;
 letter.tabIndex = 0;
 envelope.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ openEnvelope(); }});
 letter.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ expandLetter(); }});
