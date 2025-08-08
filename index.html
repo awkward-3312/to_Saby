@@ -9,19 +9,19 @@
 <body>
   <main class="stage" aria-live="polite">
     <div class="envelope-wrap">
-      <div class="hint">Toca el sobre para abrirlo</div>
+      <div class="hint" id="hint">Toca el sobre para abrirlo</div>
 
-      <div class="envelope" id="envelope" role="button" aria-label="Abrir sobre">
+      <div class="envelope" id="envelope" role="button" aria-label="Abrir sobre" aria-expanded="false" tabindex="0">
         <div class="back"></div>
         <div class="flap"></div>
         <div class="pocket"></div>
 
-        <section class="letter" id="letter" aria-label="Abrir carta">
+        <section class="letter" id="letter" aria-label="Abrir carta" aria-hidden="true" tabindex="-1">
           <header class="letter-head">
             <span>Para: <strong>Ti</strong> 💖</span>
             <div class="stamp" aria-hidden="true"></div>
             <!-- Botón de cierre para modo lectura -->
-            <button class="close-btn" id="closeLetter" aria-label="Cerrar carta (Esc)">✕</button>
+            <button class="close-btn" id="closeLetter" type="button" aria-label="Cerrar carta (Esc)">✕</button>
           </header>
 
           <div class="letter-body" id="letterBody">
@@ -30,7 +30,7 @@
             <p>Me quedé atrapada en tus ojos, como quien se queda leyendo la misma línea una y otra vez porque teme llegar al final. Tu risa… le da sentido a todo. Y tu personalidad… es el capítulo que nunca quiero que se cierre.</p>
             <p>Si esta historia fuera un libro, no querría que tuviera última página. Pero por ahora, dejemos que esta sea solo la introducción… porque lo mejor está por escribirse.</p>
 
-            <button class="cta" id="seeMore">Ver más…</button>
+            <button class="cta" id="seeMore" type="button">Ver más…</button>
           </div>
         </section>
       </div>

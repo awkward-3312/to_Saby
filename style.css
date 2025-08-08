@@ -45,6 +45,12 @@ body{
   -webkit-backface-visibility:hidden; backface-visibility:hidden; transform:translateZ(0);
 }
 
+.envelope:focus-visible,
+.letter:focus-visible{
+  outline:2px solid var(--rose);
+  outline-offset:4px;
+}
+
 /* Capas (z-index) */
 .envelope .back{
   position:absolute; inset:0;
